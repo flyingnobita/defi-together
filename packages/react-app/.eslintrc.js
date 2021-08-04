@@ -27,4 +27,5 @@ module.exports = {
     "no-restricted-syntax": "off",
     "no-plusplus": "off",
   },
+  parser: "babel-eslint",
 };
