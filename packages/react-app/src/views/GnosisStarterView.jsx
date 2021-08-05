@@ -1,11 +1,36 @@
 import { ConsoleSqlOutlined, SyncOutlined } from "@ant-design/icons";
 import { utils } from "ethers";
-import { Button, Card, DatePicker, Divider, Input, List, Progress, Slider, Spin, Switch } from "antd";
+import {
+  Statistic,
+  Row,
+  Col,
+  Button,
+  Card,
+  DatePicker,
+  Divider,
+  Input,
+  List,
+  Progress,
+  Slider,
+  Spin,
+  Switch,
+} from "antd";
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import Safe, { EthersAdapter, SafeFactory } from "@gnosis.pm/safe-core-sdk";
 import { Address, Balance, EtherInput } from "../components";
 import externalConfig from "../contracts/external_contracts.js";
+import {
+  useBalance,
+  useContractLoader,
+  useContractReader,
+  useEventListener,
+  useExchangePrice,
+  useGasPrice,
+  useOnBlock,
+  useUserSigner,
+} from "../hooks";
+
 export default function GnosisStarterView({
   purpose,
   userSigner,
@@ -34,6 +59,9 @@ export default function GnosisStarterView({
   getAddress(signer1);
 
   const ethAdapter = new EthersAdapter({ ethers, signer: signer1 });
+
+  let safeBalance = useBalance(localProvider, safeAddress);
+  let safeBalanceEth = safeBalance ? ethers.utils.formatEther(safeBalance) : "...";
 
   return (
     <div>
@@ -158,6 +186,13 @@ export default function GnosisStarterView({
             Execute Tx
           </Button>
         </div>
+      </div>
+
+      <div>
+        <Statistic title="Safe Address" value={safeAddress} />
+      </div>
+      <div>
+        <Statistic title="Safe Balance (ETH)" value={safeBalanceEth} />
       </div>
     </div>
   );
