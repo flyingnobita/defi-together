@@ -22,7 +22,7 @@
     "start": "yarn workspace @scaffold-eth/react-app start",
     "compile": "yarn workspace @scaffold-eth/hardhat compile",
     "deploy": "yarn workspace @scaffold-eth/hardhat deploy",
-    "verify": "yarn workspace @scaffold-eth/hardhat etherscan-verify", 
+    "verify": "yarn workspace @scaffold-eth/hardhat etherscan-verify",
     "watch": "yarn workspace @scaffold-eth/hardhat watch",
     "accounts": "yarn workspace @scaffold-eth/hardhat accounts",
     "balance": "yarn workspace @scaffold-eth/hardhat balance",
@@ -50,7 +50,10 @@
     "graph-ship-local": "yarn graph-prepare && yarn graph-codegen && yarn graph-deploy-local",
     "deploy-and-graph": "yarn deploy && yarn graph-ship-local",
     "theme": "yarn workspace @scaffold-eth/react-app theme",
-    "watch-theme": "yarn workspace @scaffold-eth/react-app watch"
+    "watch-theme": "yarn workspace @scaffold-eth/react-app watch",
+    "precommit:react-app": "cd packages/react-app && yarn run precommit",
+    "precommit": "npm-run-all precommit:*",
+    "prepare": "husky install"
   },
   "workspaces": {
     "packages": [
@@ -63,5 +66,9 @@
       "**/hardhat/**"
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "husky": "^7.0.1",
+    "npm-run-all": "^4.1.5"
+  }
 }
