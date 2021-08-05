@@ -23,8 +23,16 @@ export default function GnosisStarterView({
   const [selector, setSelector] = useState("");
   const [params, setParams] = useState([]);
   const [data, setData] = useState("0x0000000000000000000000000000000000000000");
-  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
   const signer1 = localProvider.getSigner();
+
+  // check address of signer1 (same as Deployer): 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  async function getAddress(signer) {
+    const add = await signer.getAddress();
+    // console.log("signer address: ", add);
+  }
+  getAddress(signer1);
+
   const ethAdapter = new EthersAdapter({ ethers, signer: signer1 });
 
   return (
@@ -98,33 +106,53 @@ export default function GnosisStarterView({
               };
               const contract = await ethAdapter.getSafeContract(safeAddress);
               console.log(contract);
+
+              /*
+               Create a safe from safeFactory
+              */
               // const safeFactory = await SafeFactory.create({ ethAdapter, contractNetworks })
               // const owners = ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']
               // const threshold = 1
               // const safeAccountConfig = { owners, threshold, to: '0x0000000000000000000000000000000000000000', data: '0x', fallbackHandler: '0x0000000000000000000000000000000000000000', paymentToken:'0x0000000000000000000000000000000000000000', payment: 0, paymentReceiver: '0x0000000000000000000000000000000000000000' }
-
               // const safeSdk = await safeFactory.deploySafe(safeAccountConfig)
               // safeAddress  = safeSdk.getAddress()
 
+              /*
+               Creates a safe from deployed Safe
+              */
               const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
-              console.log(safeSdk);
+              console.log("safeSdk: ", safeSdk);
+
+              const safeSdkBalance = await safeSdk.getBalance();
+              console.log("safeSdk Balance: ", ethers.utils.commify(ethers.utils.formatEther(safeSdkBalance)) + " ETH");
+
+              /*
+               Create a Safe Transaction
+              */
               const partialTx = {
                 to,
                 data,
                 value: value.toString(),
               };
-              console.log(partialTx);
+              console.log("partialTx: ", partialTx);
               const safeTransaction = await safeSdk.createTransaction(partialTx);
-              console.log(safeTransaction);
+              console.log("safeTransaction: ", safeTransaction);
+
+              /*
+               Off-chain signature
+              */
               const signer1Signature = await safeSdk.signTransaction(safeTransaction);
+              console.log("signer1Signature: ", signer1Signature);
+
+              /*
+               Transaction execution
+              */
               const safeSdk2 = await safeSdk.connect({ ethAdapter, safeAddress });
               const execOptions = { gasLimit: 150000, gas: 45280, safeTxGas: 45280 };
               const executeTxResponse = await safeSdk2.executeTransaction(safeTransaction, execOptions);
               const receipt =
                 executeTxResponse.transactionResponse && (await executeTxResponse.transactionResponse.wait());
-              console.log(receipt);
-              const balance = await localProvider.getBalance("0x3e35Ba3AD1921fA9a16ccc73fa980CD5fc764730");
-              console.log("bal", balance.toString());
+              console.log("receipt: ", receipt);
             }}
           >
             Execute Tx
