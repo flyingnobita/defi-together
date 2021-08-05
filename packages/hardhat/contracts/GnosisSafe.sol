@@ -1,21 +1,12 @@
-// Sources flattened with hardhat v2.4.3 https://hardhat.org
+// SPDX-License-Identifier: LGPL-3.0-only
 
-// File contracts/common/Enum.sol
+// pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.7.0 <0.8.0;
 
-pragma solidity >=0.7.0 <0.9.0;
-
-/// @title Enum - Collection of enums
-/// @author Richard Meissner - <richard@gnosis.pm>
-contract Enum {
-    enum Operation {
-        Call,
-        DelegateCall
-    }
-}
+import "./Enum.sol";
+import "./SignatureDecoder.sol";
 
 // File contracts/common/SelfAuthorized.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title SelfAuthorized - authorizes current contract to perform actions
 /// @author Richard Meissner - <richard@gnosis.pm>
@@ -33,7 +24,6 @@ contract SelfAuthorized {
 
 // File contracts/base/Executor.sol
 
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title Executor - A contract that can execute transactions
 /// @author Richard Meissner - <richard@gnosis.pm>
@@ -75,8 +65,6 @@ contract Executor {
 }
 
 // File contracts/base/ModuleManager.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title Module Manager - A contract that manages modules that can execute transactions via this contract
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -143,7 +131,7 @@ contract ModuleManager is SelfAuthorized, Executor {
         uint256 value,
         bytes memory data,
         Enum.Operation operation
-    ) public virtual returns (bool success) {
+    ) public returns (bool success) {
         // Only whitelisted modules are allowed.
         require(
             msg.sender != SENTINEL_MODULES && modules[msg.sender] != address(0),
@@ -224,8 +212,6 @@ contract ModuleManager is SelfAuthorized, Executor {
 }
 
 // File contracts/base/OwnerManager.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title OwnerManager - Manages a set of owners and a threshold to perform actions.
 /// @author Stefan George - <stefan@gnosis.pm>
@@ -396,8 +382,6 @@ contract OwnerManager is SelfAuthorized {
 
 // File contracts/base/FallbackManager.sol
 
-pragma solidity >=0.7.0 <0.9.0;
-
 /// @title Fallback Manager - A contract that manages fallback calls made to this contract
 /// @author Richard Meissner - <richard@gnosis.pm>
 contract FallbackManager is SelfAuthorized {
@@ -458,7 +442,7 @@ contract FallbackManager is SelfAuthorized {
 
 // File contracts/interfaces/IERC165.sol
 
-pragma solidity >=0.7.0 <0.9.0;
+
 
 /// @notice More details at https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/IERC165.sol
 interface IERC165 {
@@ -475,7 +459,7 @@ interface IERC165 {
 
 // File contracts/base/GuardManager.sol
 
-pragma solidity >=0.7.0 <0.9.0;
+
 
 interface Guard is IERC165 {
     function checkTransaction(
@@ -545,7 +529,7 @@ contract GuardManager is SelfAuthorized {
 
 // File contracts/common/EtherPaymentFallback.sol
 
-pragma solidity >=0.7.0 <0.9.0;
+
 
 /// @title EtherPaymentFallback - A contract that has a fallback to accept ether payments
 /// @author Richard Meissner - <richard@gnosis.pm>
@@ -560,7 +544,7 @@ contract EtherPaymentFallback {
 
 // File contracts/common/Singleton.sol
 
-pragma solidity >=0.7.0 <0.9.0;
+
 
 /// @title Singleton - Base for singleton contracts (should always be first super contract)
 ///         This contract is tightly coupled to our proxy contract (see `proxies/GnosisSafeProxy.sol`)
@@ -571,47 +555,9 @@ contract Singleton {
     address private singleton;
 }
 
-// File contracts/common/SignatureDecoder.sol
-
-pragma solidity >=0.7.0 <0.9.0;
-
-/// @title SignatureDecoder - Decodes signatures that a encoded as bytes
-/// @author Richard Meissner - <richard@gnosis.pm>
-contract SignatureDecoder {
-    /// @dev divides bytes signature into `uint8 v, bytes32 r, bytes32 s`.
-    /// @notice Make sure to perform a bounds check for @param pos, to avoid out of bounds access on @param signatures
-    /// @param pos which signature to read. A prior bounds check of this parameter should be performed, to avoid out of bounds access
-    /// @param signatures concatenated rsv signatures
-    function signatureSplit(bytes memory signatures, uint256 pos)
-        internal
-        pure
-        returns (
-            uint8 v,
-            bytes32 r,
-            bytes32 s
-        )
-    {
-        // The signature format is a compact form of:
-        //   {bytes32 r}{bytes32 s}{uint8 v}
-        // Compact means, uint8 is not padded to 32 bytes.
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let signaturePos := mul(0x41, pos)
-            r := mload(add(signatures, add(signaturePos, 0x20)))
-            s := mload(add(signatures, add(signaturePos, 0x40)))
-            // Here we are loading the last 32 bytes, including 31 bytes
-            // of 's'. There is no 'mload8' to do this.
-            //
-            // 'byte' is not working due to the Solidity parser, so lets
-            // use the second best option, 'and'
-            v := and(mload(add(signatures, add(signaturePos, 0x41))), 0xff)
-        }
-    }
-}
-
 // File contracts/common/SecuredTokenTransfer.sol
 
-pragma solidity >=0.7.0 <0.9.0;
+
 
 /// @title SecuredTokenTransfer - Secure token transfer
 /// @author Richard Meissner - <richard@gnosis.pm>
@@ -659,8 +605,6 @@ contract SecuredTokenTransfer {
 }
 
 // File contracts/common/StorageAccessible.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title StorageAccessible - generic base contract that allows callers to access all internal storage.
 /// @notice See https://github.com/gnosis/util-contracts/blob/bb5fe5fb5df6d8400998094fb1b32a178a47c3a1/contracts/StorageAccessible.sol
@@ -723,7 +667,6 @@ contract StorageAccessible {
 
 // File contracts/interfaces/ISignatureValidator.sol
 
-pragma solidity >=0.7.0 <0.9.0;
 
 contract ISignatureValidatorConstants {
     // bytes4(keccak256("isValidSignature(bytes,bytes)")
@@ -748,8 +691,6 @@ abstract contract ISignatureValidator is ISignatureValidatorConstants {
 }
 
 // File contracts/external/GnosisSafeMath.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /**
  * @title GnosisSafeMath
@@ -804,8 +745,6 @@ library GnosisSafeMath {
 }
 
 // File contracts/GnosisSafe.sol
-
-pragma solidity >=0.7.0 <0.9.0;
 
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
