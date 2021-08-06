@@ -1,3 +1,20 @@
+# Defi-Investing-Club
+
+Social DeFi Investing Club App:
+
+**_Defi Together, Moon Together_**
+
+## Overview
+
+A social investment club, basically an app that allows a bunch of people to pool their funds and make transactions together but with some DAO mechanics like rage quit and rules around adding new members.
+
+## Contributors
+
+Graeme
+flyingnobita
+!Aits
+holyaustin
+
 # 🏗 Scaffold-ETH
 
 > everything you need to build on Ethereum! 🚀
@@ -5,7 +22,6 @@
 🧪 Quickly experiment with Solidity using a frontend that adapts to your smart contract:
 
 ![image](https://user-images.githubusercontent.com/2653167/124158108-c14ca380-da56-11eb-967e-69cde37ca8eb.png)
-
 
 # 🏄‍♂️ Quick Start
 
@@ -71,7 +87,6 @@ Documentation, tutorials, challenges, and many more resources, visit: [docs.scaf
 # 🛠 Buidl
 
 Check out all the [active branches](https://github.com/austintgriffith/scaffold-eth/branches/active), [open issues](https://github.com/austintgriffith/scaffold-eth/issues), and join/fund the 🏰 [BuidlGuidl](https://BuidlGuidl.com)!
-
 
 # 💬 Support Chat
 
