@@ -20,11 +20,7 @@ import {
   useOnBlock,
   useUserSigner,
 } from "./hooks";
-// import Hints from "./Hints";
-import { GnosisStarterView, Hints, Subgraph } from "./views";
-
-//import cermaic component
-import cermaicTest from "./components/Ceramic"
+import { CeramicView, GnosisStarterView, Hints, Subgraph } from "./views";
 
 const { ethers } = require("ethers");
 /*
@@ -201,7 +197,7 @@ function App(props) {
   const purpose = useContractReader(readContracts, "YourContract", "purpose");
 
   // 📟 Listen for broadcast events
-  const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
+  // const setPurposeEvents = useEventListener(readContracts, "YourContract", "SetPurpose", localProvider, 1);
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -382,26 +378,6 @@ function App(props) {
       {networkDisplay}
       <BrowserRouter>
         <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
-          {/* <Menu.Item key="/">
-            <Link
-              onClick={() => {
-                setRoute("/");
-              }}
-              to="/"
-            >
-              YourContract
-            </Link>
-          </Menu.Item> */}
-          <Menu.Item key="/hints">
-            <Link
-              onClick={() => {
-                setRoute("/hints");
-              }}
-              to="/hints"
-            >
-              Hints
-            </Link>
-          </Menu.Item>
           <Menu.Item key="/gnosis-starter-kit">
             <Link
               onClick={() => {
@@ -410,6 +386,36 @@ function App(props) {
               to="/gnosis-starter-kit"
             >
               Gnosis Safe
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/ceramic">
+            <Link
+              onClick={() => {
+                setRoute("/ceramic");
+              }}
+              to="/ceramic"
+            >
+              Ceramic
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/">
+            <Link
+              onClick={() => {
+                setRoute("/");
+              }}
+              to="/"
+            >
+              YourContract
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/hints">
+            <Link
+              onClick={() => {
+                setRoute("/hints");
+              }}
+              to="/hints"
+            >
+              Hints
             </Link>
           </Menu.Item>
           {/* <Menu.Item key="/mainnetdai">
@@ -470,10 +476,12 @@ function App(props) {
               writeContracts={writeContracts}
               readContracts={readContracts}
               purpose={purpose}
-              setPurposeEvents={setPurposeEvents}
             />
-            {/* </Route>
-          <Route path="/mainnetdai">
+          </Route>
+          <Route path="/ceramic">
+            <CeramicView />
+          </Route>
+          {/* <Route path="/mainnetdai">
             <Contract
               name="DAI"
               customContract={mainnetContracts && mainnetContracts.contracts && mainnetContracts.contracts.DAI}
@@ -492,7 +500,7 @@ function App(props) {
               blockExplorer="https://etherscan.io/"
             />
             */}
-          </Route>
+
           {/* <Route path="/subgraph">
             <Subgraph
               subgraphUri={props.subgraphUri}
