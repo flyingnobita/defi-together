@@ -23,6 +23,9 @@ import {
 // import Hints from "./Hints";
 import { GnosisStarterView, Hints, Subgraph } from "./views";
 
+//import cermaic component
+import cermaicTest from "./components/Ceramic"
+
 const { ethers } = require("ethers");
 /*
     Welcome to 🏗 scaffold-eth !

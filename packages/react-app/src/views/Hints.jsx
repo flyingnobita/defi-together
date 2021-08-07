@@ -3,6 +3,8 @@ import { Select } from "antd";
 import React, { useState } from "react";
 import { Address, AddressInput } from "../components";
 import { useTokenList } from "../hooks";
+//import cermaic component
+import cermaicTest from "../components/Ceramic"
 
 const { Option } = Select;
 
@@ -15,6 +17,7 @@ export default function Hints({ yourLocalBalance, mainnetProvider, price, addres
 
   return (
     <div>
+      <cermaicTest />
       <div style={{ margin: 32 }}>
         <span style={{ marginRight: 8 }}>👷</span>
         Edit your <b>contract</b> in
