@@ -1,7 +1,7 @@
 import CeramicClient from "@ceramicnetwork/http-client";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { randomBytes } from "@stablelib/random";
-import { Button } from "antd";
+import { Button, Card, Form, Input } from "antd";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import KeyDidResolver from "key-did-resolver";
@@ -28,10 +28,18 @@ export default function CeramicTest() {
     await ceramic.did.authenticate();
   };
 
-  const [streamId, setStreamId] = useState();
+  const [streamId, setStreamId] = useState(); // TODO: Store streamId for other apps to retrieve
+  const [data, setData] = useState("");
 
-  const writeData = async () => {
-    const doc = await TileDocument.create(ceramic, { foo: "bar" });
+  const writeData = async function (data) {
+    console.log("writeData data: ", data);
+    var object = { 0: [1, 2, 3, 4] },
+      result = Object.keys(object).reduce(function (r, k) {
+        return r.concat(k, object[k]);
+      }, []);
+    console.log(result);
+
+    const doc = await TileDocument.create(ceramic, { data: data });
     const streamId = doc.id.toString();
     console.log("streamId: ", streamId);
     setStreamId(streamId);
@@ -40,22 +48,134 @@ export default function CeramicTest() {
   const getData = async () => {
     const docRet = await TileDocument.load(ceramic, streamId);
     console.log("docRet.content: ", docRet.content);
+    const dataToProcess = docRet.content["data"];
+    const dataProcessed = Object.keys(dataToProcess).reduce(function (r, k) {
+      return r.concat(k, dataToProcess[k]);
+    }, []);
+    console.log("dataProcessed: ", dataProcessed);
+    setData(dataProcessed);
 
-    const stream = await ceramic.loadStream(streamId);
-    console.log("stream.content: ", stream.content);
+    // This gives the same result. Any difference?
+    // const stream = await ceramic.loadStream(streamId);
+    // console.log("stream.content: ", stream.content);
   };
+
+  const onFinish = values => {
+    console.log("Success:", values);
+    writeData(values);
+  };
+
+  const onFinishFailed = errorInfo => {
+    console.log("Failed:", errorInfo);
+  };
+
+  const { TextArea } = Input;
+  const onChange = e => {
+    console.log("Change:", e.target.value);
+  };
+
   return (
     <div>
       <div>
+        <Form
+          name="user1"
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          initialValues={{
+            remember: true,
+          }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+        >
+          <Form.Item
+            label="User 1"
+            name="user1"
+            rules={[
+              {
+                required: true,
+                message: "Please input your username!",
+              },
+            ]}
+          >
+            <TextArea showCount maxLength={100} onChange={onChange} />
+          </Form.Item>
+
+          <Form.Item
+            wrapperCol={{
+              offset: 8,
+              span: 16,
+            }}
+          >
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+
+      <div>
+        <Form
+          name="user2"
+          labelCol={{
+            span: 8,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          initialValues={{
+            remember: true,
+          }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+        >
+          <Form.Item
+            label="User 2"
+            name="user2"
+            rules={[
+              {
+                required: true,
+                message: "Please input your username!",
+              },
+            ]}
+          >
+            <TextArea showCount maxLength={100} onChange={onChange} />
+          </Form.Item>
+
+          <Form.Item
+            wrapperCol={{
+              offset: 8,
+              span: 16,
+            }}
+          >
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+
+      <div>
+        <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
+          <Card style={{ width: 300 }}>
+            <p>{data[0] + ": " + data[1]}</p>
+          </Card>
+        </div>
+      </div>
+
+      {/* <div>
         <Button type="primary" onClick={() => authenticate()}>
           authenticate()
         </Button>
-      </div>
-      <div>
+      </div> */}
+      {/* <div>
         <Button type="primary" onClick={() => writeData()}>
           writeData()
         </Button>
-      </div>
+      </div> */}
       <div>
         <Button type="primary" onClick={() => getData()}>
           getData()
