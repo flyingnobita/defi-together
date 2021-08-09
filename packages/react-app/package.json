@@ -92,7 +92,7 @@
     "start": "react-scripts start",
     "test": "react-scripts test",
     "precommit": "yarn run prettier && yarn run lint",
-    "prettier": "prettier --write src/**/*.{ts,tsx,js,jsx}",
+    "prettier": "prettier --write .",
     "lint": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore ./src/**/*",
     "ipfs": "node ./scripts/ipfs.js",
     "surge": "cp build/index.html build/200.html && surge ./build",
