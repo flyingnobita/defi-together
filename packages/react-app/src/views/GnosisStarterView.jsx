@@ -15,7 +15,7 @@ import {
   Spin,
   Switch,
 } from "antd";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import Safe, { EthersAdapter, SafeFactory } from "@gnosis.pm/safe-core-sdk";
 import { Address, Balance, EtherInput } from "../components";
@@ -48,8 +48,27 @@ export default function GnosisStarterView({
   const [selector, setSelector] = useState("");
   const [params, setParams] = useState([]);
   const [data, setData] = useState("0x0000000000000000000000000000000000000000");
-  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
   const signer1 = localProvider.getSigner();
+
+  const [safeSdk, setSafeSdk] = useState();
+  const [safeOwners, setSafeOwners] = useState("");
+  const [safeThreshold, setSafeThreshold] = useState("");
+
+  const [newOwnerAddress, setNewOwnerAddress] = useState("");
+  const [newThreshold, setNewThreshold] = useState("");
+
+  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
+  let safeBalance = useBalance(localProvider, safeAddress);
+  let safeBalanceEth = safeBalance ? ethers.utils.formatEther(safeBalance) : "...";
+
+  useEffect(() => {
+    createSafe();
+  }, [address]);
+
+  useEffect(() => {
+    getOwners();
+    getThreshold();
+  }, [safeSdk]);
 
   // check address of signer1 (same as Deployer): 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
   async function getAddress(signer) {
@@ -60,14 +79,200 @@ export default function GnosisStarterView({
 
   const ethAdapter = new EthersAdapter({ ethers, signer: signer1 });
 
-  let safeBalance = useBalance(localProvider, safeAddress);
-  let safeBalanceEth = safeBalance ? ethers.utils.formatEther(safeBalance) : "...";
+  async function createSafe() {
+    const id = await ethAdapter.getChainId();
+    const contractNetworks = {
+      [id]: {
+        multiSendAddress: safeAddress,
+        safeMasterCopyAddress: safeAddress,
+        safeProxyFactoryAddress: safeAddress,
+      },
+    };
+    // const contract = await ethAdapter.getSafeContract(safeAddress);
+    // console.log(contract);
+
+    /*
+     Create a safe from safeFactory
+    */
+    // const safeFactory = await SafeFactory.create({ ethAdapter, contractNetworks });
+    // const safeFactory = await SafeFactory.create({ ethAdapter, contractNetworks });
+    // console.log("address: ", address);
+    // const owners = [address];
+    // const threshold = 1;
+    // const safeAccountConfig = {
+    //   owners,
+    //   threshold,
+    // to: "0x0000000000000000000000000000000000000000",
+    // data: "0x",
+    // fallbackHandler: "0x0000000000000000000000000000000000000000",
+    // paymentToken: "0x0000000000000000000000000000000000000000",
+    // payment: 0,
+    // paymentReceiver: "0x0000000000000000000000000000000000000000",
+    // };
+    // const safeSdk = await safeFactory.deploySafe(safeAccountConfig);
+    // safeAddress = safeSdk.getAddress();
+
+    /*
+     Creates a safe from deployed Safe
+    */
+    const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
+    console.log("safeSdk: ", safeSdk);
+    setSafeSdk(safeSdk);
+  }
+
+  async function executeTransaction() {
+    /*
+      Create a Safe Transaction
+    */
+    if (to) {
+      const partialTx = {
+        to,
+        data,
+        value: value.toString(),
+      };
+      console.log("partialTx: ", partialTx);
+      const safeTransaction = await safeSdk.createTransaction(partialTx);
+      console.log("safeTransaction: ", safeTransaction);
+
+      /*
+        Off-chain signature
+      */
+      const signer1Signature = await safeSdk.signTransaction(safeTransaction);
+      console.log("signer1Signature: ", signer1Signature);
+
+      /*
+        Transaction execution
+      */
+      const safeSdk3 = await safeSdk.connect({ ethAdapter, safeAddress });
+      const execOptions = { gasLimit: 150000, gas: 45280, safeTxGas: 45280 };
+      const executeTxResponse = await safeSdk3.executeTransaction(safeTransaction, execOptions);
+      const receipt = executeTxResponse.transactionResponse && (await executeTxResponse.transactionResponse.wait());
+      console.log("receipt: ", receipt);
+    }
+  }
+
+  async function addOwner() {
+    if (safeSdk) {
+      const ethAdapterOwner2 = new EthersAdapter({ ethers, signer: signer1 });
+      const safeSdk2 = await safeSdk.connect({ ethAdapter: ethAdapterOwner2, safeAddress });
+
+      let safeTransaction;
+      try {
+        safeTransaction = await safeSdk.getAddOwnerTx(newOwnerAddress);
+      } catch (e) {
+        console.log("getAddOwnerTx Error: ", e);
+        return;
+      }
+
+      console.log("safeTransaction: ", safeTransaction);
+      const txResponse = await safeSdk.executeTransaction(safeTransaction);
+      console.log(txResponse);
+      // await txResponse.wait();
+
+      const txHash = await safeSdk2.getTransactionHash(safeTransaction);
+      const approveTxResponse = await safeSdk2.approveTransactionHash(txHash);
+      // await approveTxResponse.wait();
+
+      getOwners();
+      getThreshold();
+    }
+  }
+
+  async function removeOwner() {
+    if (safeSdk) {
+      try {
+        console.log("newThreshold: ", newThreshold);
+        const safeTransaction = await safeSdk.getRemoveOwnerTx(newOwnerAddress, newThreshold);
+        const txResponse = await safeSdk.executeTransaction(safeTransaction);
+        // await txResponse.wait()
+
+        getOwners();
+        getThreshold();
+      } catch (e) {
+        console.log("getRemoveOwnerTx Error: ", e);
+        return;
+      }
+    }
+  }
+
+  async function getOwners() {
+    if (safeSdk) {
+      const owners = await safeSdk.getOwners();
+      setSafeOwners(owners.join("\r\n"));
+    }
+  }
+
+  async function getThreshold() {
+    if (safeSdk) {
+      const threshold = await safeSdk.getThreshold();
+      setSafeThreshold(threshold);
+    }
+  }
 
   return (
     <div>
-      {/*
-        ⚙️ Here is an example UI that displays and sets the purpose in your smart contract:
-      */}
+      <div style={{ border: "1px solid #cccccc", padding: 16, width: 600, margin: "auto", marginTop: 64 }}>
+        <h2>Safe</h2>
+        <div>
+          <Statistic title="Safe Address" value={safeAddress} />
+        </div>
+        <div>
+          <Statistic title="Safe Balance (ETH)" value={safeBalanceEth} />
+        </div>
+        <div>
+          <Statistic title="Owners" value={safeOwners} />
+        </div>
+        <div>
+          <Statistic title="Threshold" value={safeThreshold} />
+        </div>
+      </div>
+      <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
+        <h2>Owners Management</h2>
+        <Input
+          placeholder="Address"
+          onChange={async e => {
+            setNewOwnerAddress(e.target.value);
+          }}
+        />
+        <Input
+          placeholder="New Threshold"
+          onChange={async e => {
+            setNewThreshold(e.target.value);
+          }}
+        />
+        {/* <Button
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              createSafe();
+            }}
+          >
+            Create Safe
+          </Button> */}
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            addOwner();
+          }}
+        >
+          Add
+        </Button>
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            removeOwner();
+          }}
+        >
+          Remove
+        </Button>
+        {/* <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            getOwners();
+          }}
+        >
+          Get Owners
+        </Button> */}
+      </div>
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Gnosis Transaction Execution</h2>
         <h5>Enter Selector and Params only if the to address is a contract address</h5>
@@ -123,76 +328,12 @@ export default function GnosisStarterView({
                 const data = iface.encodeFunctionData(fragment, params);
                 setData(data);
               }
-
-              const id = await ethAdapter.getChainId();
-              const contractNetworks = {
-                [id]: {
-                  multiSendAddress: safeAddress,
-                  safeMasterCopyAddress: safeAddress,
-                  safeProxyFactoryAddress: safeAddress,
-                },
-              };
-              const contract = await ethAdapter.getSafeContract(safeAddress);
-              console.log(contract);
-
-              /*
-               Create a safe from safeFactory
-              */
-              // const safeFactory = await SafeFactory.create({ ethAdapter, contractNetworks })
-              // const owners = ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']
-              // const threshold = 1
-              // const safeAccountConfig = { owners, threshold, to: '0x0000000000000000000000000000000000000000', data: '0x', fallbackHandler: '0x0000000000000000000000000000000000000000', paymentToken:'0x0000000000000000000000000000000000000000', payment: 0, paymentReceiver: '0x0000000000000000000000000000000000000000' }
-              // const safeSdk = await safeFactory.deploySafe(safeAccountConfig)
-              // safeAddress  = safeSdk.getAddress()
-
-              /*
-               Creates a safe from deployed Safe
-              */
-              const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
-              console.log("safeSdk: ", safeSdk);
-
-              const safeSdkBalance = await safeSdk.getBalance();
-              console.log("safeSdk Balance: ", ethers.utils.commify(ethers.utils.formatEther(safeSdkBalance)) + " ETH");
-
-              /*
-               Create a Safe Transaction
-              */
-              const partialTx = {
-                to,
-                data,
-                value: value.toString(),
-              };
-              console.log("partialTx: ", partialTx);
-              const safeTransaction = await safeSdk.createTransaction(partialTx);
-              console.log("safeTransaction: ", safeTransaction);
-
-              /*
-               Off-chain signature
-              */
-              const signer1Signature = await safeSdk.signTransaction(safeTransaction);
-              console.log("signer1Signature: ", signer1Signature);
-
-              /*
-               Transaction execution
-              */
-              const safeSdk2 = await safeSdk.connect({ ethAdapter, safeAddress });
-              const execOptions = { gasLimit: 150000, gas: 45280, safeTxGas: 45280 };
-              const executeTxResponse = await safeSdk2.executeTransaction(safeTransaction, execOptions);
-              const receipt =
-                executeTxResponse.transactionResponse && (await executeTxResponse.transactionResponse.wait());
-              console.log("receipt: ", receipt);
+              executeTransaction();
             }}
           >
             Execute Tx
           </Button>
         </div>
-      </div>
-
-      <div>
-        <Statistic title="Safe Address" value={safeAddress} />
-      </div>
-      <div>
-        <Statistic title="Safe Balance (ETH)" value={safeBalanceEth} />
       </div>
     </div>
   );
