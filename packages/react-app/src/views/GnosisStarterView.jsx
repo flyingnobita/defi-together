@@ -1,35 +1,9 @@
-import { ConsoleSqlOutlined, SyncOutlined } from "@ant-design/icons";
-import { utils } from "ethers";
-import {
-  Statistic,
-  Row,
-  Col,
-  Button,
-  Card,
-  DatePicker,
-  Divider,
-  Input,
-  List,
-  Progress,
-  Slider,
-  Spin,
-  Switch,
-} from "antd";
-import React, { useState, useEffect } from "react";
+import Safe, { EthersAdapter } from "@gnosis.pm/safe-core-sdk";
+import { Button, Divider, Input, Statistic } from "antd";
 import { ethers } from "ethers";
-import Safe, { EthersAdapter, SafeFactory } from "@gnosis.pm/safe-core-sdk";
-import { Address, Balance, EtherInput } from "../components";
-import externalConfig from "../contracts/external_contracts.js";
-import {
-  useBalance,
-  useContractLoader,
-  useContractReader,
-  useEventListener,
-  useExchangePrice,
-  useGasPrice,
-  useOnBlock,
-  useUserSigner,
-} from "../hooks";
+import React, { useEffect, useState } from "react";
+import { EtherInput } from "../components";
+import { useBalance } from "../hooks";
 
 export default function GnosisStarterView({
   purpose,
