@@ -31,14 +31,8 @@ export default function CeramicTest() {
   const [streamId, setStreamId] = useState(); // TODO: Store streamId for other apps to retrieve
   const [data, setData] = useState("");
 
-  const writeData = async function (data) {
+  const writeData = async function(data) {
     console.log("writeData data: ", data);
-    var object = { 0: [1, 2, 3, 4] },
-      result = Object.keys(object).reduce(function (r, k) {
-        return r.concat(k, object[k]);
-      }, []);
-    console.log(result);
-
     const doc = await TileDocument.create(ceramic, { data: data });
     const streamId = doc.id.toString();
     console.log("streamId: ", streamId);
@@ -49,7 +43,7 @@ export default function CeramicTest() {
     const docRet = await TileDocument.load(ceramic, streamId);
     console.log("docRet.content: ", docRet.content);
     const dataToProcess = docRet.content["data"];
-    const dataProcessed = Object.keys(dataToProcess).reduce(function (r, k) {
+    const dataProcessed = Object.keys(dataToProcess).reduce(function(r, k) {
       return r.concat(k, dataToProcess[k]);
     }, []);
     console.log("dataProcessed: ", dataProcessed);
@@ -61,7 +55,7 @@ export default function CeramicTest() {
   };
 
   const onFinish = values => {
-    console.log("Success:", values);
+    // console.log("Success:", values);
     writeData(values);
   };
 
@@ -71,7 +65,7 @@ export default function CeramicTest() {
 
   const { TextArea } = Input;
   const onChange = e => {
-    console.log("Change:", e.target.value);
+    // console.log("Change:", e.target.value);
   };
 
   return (
@@ -96,7 +90,7 @@ export default function CeramicTest() {
             name="user1"
             rules={[
               {
-                required: true,
+                required: false,
                 message: "Please input your username!",
               },
             ]}
@@ -137,7 +131,7 @@ export default function CeramicTest() {
             name="user2"
             rules={[
               {
-                required: true,
+                required: false,
                 message: "Please input your username!",
               },
             ]}
