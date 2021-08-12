@@ -208,9 +208,6 @@ export default function GnosisStarterView({
   }
 
   async function sendEtherToSafe() {
-    console.log("sendEther()");
-    console.log("signer.address: ", await signerLocalProvider.getAddress());
-    console.log("userSigner: ", await userSigner.getAddress());
     await userSigner.sendTransaction({
       to: safeAddress,
       value: ethers.utils.parseEther(ethToSend),
