@@ -7,22 +7,24 @@ import { useBalance } from "../hooks";
 
 export default function GnosisStarterView({
   purpose,
-  userSigner,
+  userSigner, // injectedProvider == MetaMask
   address,
   mainnetProvider,
-  localProvider,
+  localProvider, // hardhat
   yourLocalBalance,
   price,
   tx,
   readContracts,
   writeContracts,
+  DEBUG,
 }) {
   const [to, setTo] = useState("");
   const [value, setValue] = useState(0);
   const [selector, setSelector] = useState("");
   const [params, setParams] = useState([]);
   const [data, setData] = useState("0x0000000000000000000000000000000000000000");
-  const signer1 = localProvider.getSigner();
+  const [userSignerAddress, setUserSignerAddress] = useState("");
+  const [localProviderAddress, setLocalProviderAddress] = useState("");
 
   const [safeSdk, setSafeSdk] = useState();
   const [safeOwners, setSafeOwners] = useState("");
@@ -31,9 +33,13 @@ export default function GnosisStarterView({
   const [newOwnerAddress, setNewOwnerAddress] = useState("");
   const [newThreshold, setNewThreshold] = useState("");
 
+  const [ethToSend, setEthToSend] = useState(0);
+
   let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
   let safeBalance = useBalance(localProvider, safeAddress);
   let safeBalanceEth = safeBalance ? ethers.utils.formatEther(safeBalance) : "...";
+
+  const signerLocalProvider = localProvider.getSigner();
 
   useEffect(() => {
     createSafe();
@@ -44,14 +50,33 @@ export default function GnosisStarterView({
     getThreshold();
   }, [safeSdk]);
 
-  // check address of signer1 (same as Deployer): 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-  async function getAddress(signer) {
-    const add = await signer.getAddress();
-    // console.log("signer address: ", add);
-  }
-  getAddress(signer1);
+  useEffect(() => {
+    getUserSignerAddress();
+  }, [userSigner]);
 
-  const ethAdapter = new EthersAdapter({ ethers, signer: signer1 });
+  useEffect(() => {
+    getLocalProviderAddress();
+  }, [localProvider]);
+
+  // check address of signer1 (same as Deployer): 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+  async function getLocalProviderAddress() {
+    if (signerLocalProvider) {
+      setLocalProviderAddress(await signerLocalProvider.getAddress());
+    }
+  }
+
+  async function getUserSignerAddress() {
+    if (userSigner) {
+      setUserSignerAddress(await userSigner.getAddress());
+    }
+  }
+
+  if (DEBUG) {
+    console.log("localProviderAddress: ", localProviderAddress);
+    console.log("userSignerAddress: ", userSignerAddress);
+  }
+
+  const ethAdapter = new EthersAdapter({ ethers, signer: signerLocalProvider });
 
   async function createSafe() {
     const id = await ethAdapter.getChainId();
@@ -90,7 +115,6 @@ export default function GnosisStarterView({
      Creates a safe from deployed Safe
     */
     const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
-    console.log("safeSdk: ", safeSdk);
     setSafeSdk(safeSdk);
   }
 
@@ -127,7 +151,7 @@ export default function GnosisStarterView({
 
   async function addOwner() {
     if (safeSdk) {
-      const ethAdapterOwner2 = new EthersAdapter({ ethers, signer: signer1 });
+      const ethAdapterOwner2 = new EthersAdapter({ ethers, signer: signerLocalProvider });
       const safeSdk2 = await safeSdk.connect({ ethAdapter: ethAdapterOwner2, safeAddress });
 
       let safeTransaction;
@@ -181,6 +205,16 @@ export default function GnosisStarterView({
       const threshold = await safeSdk.getThreshold();
       setSafeThreshold(threshold);
     }
+  }
+
+  async function sendEtherToSafe() {
+    console.log("sendEther()");
+    console.log("signer.address: ", await signerLocalProvider.getAddress());
+    console.log("userSigner: ", await userSigner.getAddress());
+    await userSigner.sendTransaction({
+      to: safeAddress,
+      value: ethers.utils.parseEther(ethToSend),
+    });
   }
 
   return (
@@ -246,6 +280,23 @@ export default function GnosisStarterView({
         >
           Get Owners
         </Button> */}
+      </div>
+      <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
+        <h2>Send ETH to Safe</h2>
+        <Input
+          placeholder="Amount of ETH (e.g. 1)"
+          onChange={async e => {
+            setEthToSend(e.target.value);
+          }}
+        />
+        <Button
+          style={{ marginTop: 8 }}
+          onClick={async () => {
+            sendEtherToSafe();
+          }}
+        >
+          Send
+        </Button>
       </div>
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Gnosis Transaction Execution</h2>
