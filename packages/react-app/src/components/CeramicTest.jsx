@@ -22,7 +22,7 @@ export default function CeramicTest() {
 
   useEffect(() => {
     authenticate();
-  }, []);
+  });
 
   const authenticate = async () => {
     await ceramic.did.authenticate();
@@ -31,7 +31,7 @@ export default function CeramicTest() {
   const [streamId, setStreamId] = useState(); // TODO: Store streamId for other apps to retrieve
   const [data, setData] = useState("");
 
-  const writeData = async function(data) {
+  const writeData = async function (data) {
     console.log("writeData data: ", data);
     const doc = await TileDocument.create(ceramic, { data: data });
     const streamId = doc.id.toString();
@@ -43,7 +43,7 @@ export default function CeramicTest() {
     const docRet = await TileDocument.load(ceramic, streamId);
     console.log("docRet.content: ", docRet.content);
     const dataToProcess = docRet.content["data"];
-    const dataProcessed = Object.keys(dataToProcess).reduce(function(r, k) {
+    const dataProcessed = Object.keys(dataToProcess).reduce(function (r, k) {
       return r.concat(k, dataToProcess[k]);
     }, []);
     console.log("dataProcessed: ", dataProcessed);
