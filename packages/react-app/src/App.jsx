@@ -20,7 +20,7 @@ import {
   useOnBlock,
   useUserSigner,
 } from "./hooks";
-import { CeramicView, GnosisStarterView, Hints, Subgraph } from "./views";
+import { CeramicView, GnosisStarterView, StartingCapitalView, OwnersView, Hints, Subgraph } from "./views";
 
 const { ethers } = require("ethers");
 /*
@@ -397,6 +397,26 @@ function App(props) {
               Gnosis Safe
             </Link>
           </Menu.Item>
+          <Menu.Item key="/starting-capital">
+            <Link
+              onClick={() => {
+                setRoute("/starting-capital");
+              }}
+              to="/starting-capital"
+            >
+              Starting Capital
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/owners-view">
+            <Link
+              onClick={() => {
+                setRoute("/owners-view");
+              }}
+              to="/owners-view"
+            >
+              Invite Friends
+            </Link>
+          </Menu.Item>
           <Menu.Item key="/ceramic">
             <Link
               onClick={() => {
@@ -471,6 +491,36 @@ function App(props) {
               yourLocalBalance={yourLocalBalance}
               mainnetProvider={mainnetProvider}
               price={price}
+            />
+          </Route>
+          <Route path="/starting-capital">
+            <StartingCapitalView
+              address={address}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              localProvider={localProvider}
+              yourLocalBalance={yourLocalBalance}
+              price={price}
+              tx={tx}
+              writeContracts={writeContracts}
+              readContracts={readContracts}
+              purpose={purpose}
+              DEBUG={DEBUG}
+            />
+          </Route>
+          <Route path="/owners-view">
+            <OwnersView
+              address={address}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              localProvider={localProvider}
+              yourLocalBalance={yourLocalBalance}
+              price={price}
+              tx={tx}
+              writeContracts={writeContracts}
+              readContracts={readContracts}
+              purpose={purpose}
+              DEBUG={DEBUG}
             />
           </Route>
           <Route path="/gnosis-starter-kit">
