@@ -4,7 +4,7 @@ import WalletLink from "walletlink";
 import { Alert, Button, Col, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
-import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Link, Redirect, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
 import "./App.css";
 import { Account, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
@@ -382,7 +382,6 @@ function App(props) {
 
   return (
     <div className="App">
-      {/* ✏️ Edit the header and change the title to your project name */}
       <Header />
       {networkDisplay}
       <BrowserRouter>
@@ -427,12 +426,12 @@ function App(props) {
               Ceramic
             </Link>
           </Menu.Item>
-          <Menu.Item key="/">
+          <Menu.Item key="/your-contracts">
             <Link
               onClick={() => {
-                setRoute("/");
+                setRoute("/your-contracts");
               }}
-              to="/"
+              to="/your-contracts"
             >
               YourContract
             </Link>
@@ -471,12 +470,9 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-
+            <Redirect to="/ceramic" />
+          </Route>
+          <Route path="/your-contracts">
             <Contract
               name="YourContract"
               signer={userSigner}
