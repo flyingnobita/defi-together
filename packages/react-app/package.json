@@ -15,8 +15,10 @@
     ]
   },
   "dependencies": {
+    "@3id/connect": "^0.1.6",
     "@ant-design/icons": "^4.2.2",
     "@apollo/react-hooks": "^4.0.0",
+    "@ceramicnetwork/3id-did-resolver": "^1.3.1",
     "@ceramicnetwork/http-client": "^1.0.7",
     "@ceramicnetwork/stream-tile": "^1.0.7",
     "@gnosis.pm/safe-core-sdk": "^0.3.1",
@@ -41,8 +43,6 @@
     "graphiql": "^1.0.5",
     "graphql": "^15.3.0",
     "isomorphic-fetch": "^3.0.0",
-    "key-did-provider-ed25519": "^1.1.0",
-    "key-did-resolver": "^1.2.1",
     "node-watch": "^0.7.1",
     "postcss": "^8.2.6",
     "qrcode.react": "^1.0.0",

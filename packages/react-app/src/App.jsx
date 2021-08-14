@@ -21,6 +21,8 @@ import {
   useUserSigner,
 } from "./hooks";
 import { CeramicView, GnosisStarterView, StartingCapitalView, OwnersView, Hints, Subgraph } from "./views";
+import CeramicInit from "./components/CeramicInit";
+import CeramicClient from "@ceramicnetwork/http-client";
 
 const { ethers } = require("ethers");
 /*
@@ -380,6 +382,18 @@ function App(props) {
       .then(result => console.log("injectedProvider addresses: ", result));
   }
 
+  const [ceramicState, setCeramicState] = useState("notAuth");
+  const [ceramic, setCeramic] = useState();
+  const API_URL = "https://ceramic-clay.3boxlabs.com";
+  let ceramicRet = new CeramicClient(API_URL);
+  if (ceramicState === "notAuth") {
+    async function startCeramicInit() {
+      ceramicRet = await CeramicInit(setCeramicState, ceramicRet);
+      setCeramic(ceramicRet);
+    }
+    startCeramicInit();
+  }
+
   return (
     <div className="App">
       <Header />
@@ -535,7 +549,7 @@ function App(props) {
             />
           </Route>
           <Route path="/ceramic">
-            <CeramicView />
+            <CeramicView ceramic={ceramic} />
           </Route>
           {/* <Route path="/mainnetdai">
             <Contract
