@@ -1,5 +1,5 @@
 import Safe, { EthersAdapter } from "@gnosis.pm/safe-core-sdk";
-import { Button, Input, Statistic } from "antd";
+import { Button, Input, Statistic, Divider } from "antd";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { useBalance } from "../hooks";
@@ -15,6 +15,7 @@ export default function StartingCapitalView({
   tx,
   readContracts,
   writeContracts,
+  safeAddress,
   DEBUG,
 }) {
   const [to, setTo] = useState("");
@@ -37,7 +38,6 @@ export default function StartingCapitalView({
   const [moduleAddress, setModuleAddress] = useState("");
   const [modules, setModules] = useState("");
 
-  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
   let safeBalance = useBalance(localProvider, safeAddress);
   let safeBalanceEth = safeBalance ? ethers.utils.formatEther(safeBalance) : "...";
 
@@ -232,7 +232,15 @@ export default function StartingCapitalView({
 
   return (
     <div>
-      <div style={{ border: "1px solid #cccccc", padding: 16, width: 600, margin: "auto", marginTop: 64 }}>
+      <div
+        style={{
+          border: "1px solid #cccccc",
+          padding: 16,
+          width: 600,
+          margin: "auto",
+          marginTop: 64,
+        }}
+      >
         <h2>Safe</h2>
         <div>
           <Statistic title="Safe Address" value={safeAddress} />
@@ -250,7 +258,16 @@ export default function StartingCapitalView({
           <Statistic title="Modules" value={modules} />
         </div>
       </div>
-      <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
+      <div
+        style={{
+          border: "1px solid #cccccc",
+          padding: 16,
+          width: 400,
+          margin: "auto",
+          marginTop: 64,
+          marginBottom: 180,
+        }}
+      >
         <h2>Send ETH to Safe</h2>
         <Input
           placeholder="Amount of ETH (e.g. 1)"
@@ -266,6 +283,9 @@ export default function StartingCapitalView({
         >
           Send
         </Button>
+      </div>
+      <div>
+        <Divider />
       </div>
     </div>
   );

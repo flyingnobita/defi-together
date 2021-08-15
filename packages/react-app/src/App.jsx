@@ -20,7 +20,15 @@ import {
   useOnBlock,
   useUserSigner,
 } from "./hooks";
-import { CeramicView, GnosisStarterView, StartingCapitalView, OwnersView, Hints, Subgraph } from "./views";
+import {
+  CeramicView,
+  GnosisStarterView,
+  StartingCapitalView,
+  OwnersView,
+  ProposeTransactionView,
+  Hints,
+  Subgraph,
+} from "./views";
 import CeramicInit from "./components/CeramicInit";
 import CeramicClient from "@ceramicnetwork/http-client";
 
@@ -394,6 +402,8 @@ function App(props) {
     startCeramicInit();
   }
 
+  let safeAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // default "GnosisSafe Contract" address
+
   return (
     <div className="App">
       <Header />
@@ -430,7 +440,17 @@ function App(props) {
               Invite Friends
             </Link>
           </Menu.Item>
-          <Menu.Item key="/ceramic">
+          <Menu.Item key="/propose-transaction">
+            <Link
+              onClick={() => {
+                setRoute("/propose-transaction");
+              }}
+              to="/propose-transaction"
+            >
+              Propose Transaction
+            </Link>
+          </Menu.Item>
+          {/* <Menu.Item key="/ceramic">
             <Link
               onClick={() => {
                 setRoute("/ceramic");
@@ -439,7 +459,7 @@ function App(props) {
             >
               Ceramic
             </Link>
-          </Menu.Item>
+          </Menu.Item> */}
           {/* <Menu.Item key="/your-contracts">
             <Link
               onClick={() => {
@@ -515,6 +535,7 @@ function App(props) {
               writeContracts={writeContracts}
               readContracts={readContracts}
               purpose={purpose}
+              safeAddress={safeAddress}
               DEBUG={DEBUG}
             />
           </Route>
@@ -530,6 +551,7 @@ function App(props) {
               writeContracts={writeContracts}
               readContracts={readContracts}
               purpose={purpose}
+              safeAddress={safeAddress}
               DEBUG={DEBUG}
             />
           </Route>
@@ -545,11 +567,28 @@ function App(props) {
               writeContracts={writeContracts}
               readContracts={readContracts}
               purpose={purpose}
+              safeAddress={safeAddress}
+              DEBUG={DEBUG}
+            />
+          </Route>
+          <Route path="/propose-transaction">
+            <ProposeTransactionView
+              address={address}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              localProvider={localProvider}
+              yourLocalBalance={yourLocalBalance}
+              price={price}
+              tx={tx}
+              writeContracts={writeContracts}
+              readContracts={readContracts}
+              purpose={purpose}
+              safeAddress={safeAddress}
               DEBUG={DEBUG}
             />
           </Route>
           <Route path="/ceramic">
-            <CeramicView ceramic={ceramic} />
+            <CeramicView ceramic={ceramic} safeAddress={safeAddress} />
           </Route>
           {/* <Route path="/mainnetdai">
             <Contract

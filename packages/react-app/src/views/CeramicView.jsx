@@ -2,7 +2,7 @@ import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { Button, Card, Form, Input } from "antd";
 import React, { useEffect, useState } from "react";
 
-export default function CeramicView({ ceramic }) {
+export default function CeramicView({ ceramic, safeAddress }) {
   const [streamId, setStreamId] = useState();
   const [data, setData] = useState("");
 
@@ -11,10 +11,12 @@ export default function CeramicView({ ceramic }) {
   const writeData = async function (data) {
     if (ceramic) {
       const newContent = { data: data };
-      const metadata = { controllers: [ceramic.did.id], tags: ["a"], deterministic: true };
+      const controller = ceramic.did.id;
+      const metadata = { controllers: [controller], tags: [safeAddress], deterministic: true };
       let doc = await TileDocument.create(ceramic, null, metadata);
       let streamId = doc.id.toString();
       setStreamId(streamId);
+      console.log("streamId: ", streamId);
 
       doc = await TileDocument.load(ceramic, streamId);
       await doc.update(newContent);
@@ -23,25 +25,19 @@ export default function CeramicView({ ceramic }) {
   };
 
   const getData = async () => {
-    const controller = ceramic.did.id;
-    const docRet = await TileDocument.create(
-      ceramic,
-      null,
-      {
-        controllers: [controller],
-        tags: ["a"],
-        deterministic: true,
-      },
-      { anchor: false, publish: false },
-    );
+    if (ceramic) {
+      const controller = ceramic.did.id;
+      const metadata = { controllers: [controller], tags: [safeAddress], deterministic: true };
+      const docRet = await TileDocument.create(ceramic, null, metadata, { anchor: false, publish: false });
 
-    const dataToProcess = docRet.content["data"];
-    if (dataToProcess) {
-      const dataProcessed = Object.keys(dataToProcess).reduce(function (r, k) {
-        return r.concat(k, dataToProcess[k]);
-      }, []);
+      const dataToProcess = docRet.content["data"];
+      if (dataToProcess) {
+        const dataProcessed = Object.keys(dataToProcess).reduce(function (r, k) {
+          return r.concat(k, dataToProcess[k]);
+        }, []);
 
-      setData(dataProcessed);
+        setData(dataProcessed);
+      }
     }
   };
 
