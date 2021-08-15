@@ -440,7 +440,7 @@ function App(props) {
               Ceramic
             </Link>
           </Menu.Item>
-          <Menu.Item key="/your-contracts">
+          {/* <Menu.Item key="/your-contracts">
             <Link
               onClick={() => {
                 setRoute("/your-contracts");
@@ -459,7 +459,7 @@ function App(props) {
             >
               Hints
             </Link>
-          </Menu.Item>
+          </Menu.Item> */}
           {/* <Menu.Item key="/mainnetdai">
             <Link
               onClick={() => {
